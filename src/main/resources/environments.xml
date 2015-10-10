@@ -1,0 +1,14 @@
+<environments>
+	<env id="siccore1" access="sftp">
+		<address>localhost</address>
+		<port>22</port>
+		<user>tiocansino</user>
+		<pass>mypassword</pass>
+	</env>
+	<env id="siccore2" access="sftp">
+		<address>localhost</address>
+		<port>22</port>
+		<user>tiocansino</user>
+		<pass>mypassword</pass>
+	</env>
+</environments>

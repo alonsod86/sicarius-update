@@ -1,0 +1,26 @@
+<deployments>
+	<deploy id="core">
+		<!-- where the deploy is going to happen -->
+		<environments>
+			<env>siccore1</env>
+			<env>siccore2</env>
+		</environments>
+		<!-- shell commands to execute before update -->
+		<pre>
+			<cmd>ping -c 1 localhost</cmd>
+		</pre>
+		<!-- update configuration -->
+		<update log="${core.log}" timeout="200">
+			<local>${core.local}</local>
+			<remote>${core.remote}</remote>
+			<filter>core.war</filter>
+			<!-- optional monitoring deploy -->
+			<watch>icmp_seq</watch>
+			<rollback>Exception</rollback>
+		</update>
+		<!-- shell commands to execute after update -->
+		<post>
+			<cmd>service core start</cmd>
+		</post>
+	</deploy>
+</deployments>
