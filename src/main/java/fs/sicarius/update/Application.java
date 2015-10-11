@@ -20,7 +20,7 @@ public class Application {
 		
 		// show commands help
 		displayHelp();
-		updateDeploys(ctx);
+
 		// main loop
 		boolean exit = false;
 		while (!exit) {

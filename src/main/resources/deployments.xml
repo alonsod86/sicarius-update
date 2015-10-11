@@ -7,20 +7,19 @@
 		</environments>
 		<!-- shell commands to execute before update -->
 		<pre>
-			<cmd>ping -c 1 localhost</cmd>
+			<cmd>pwd</cmd>
 		</pre>
 		<!-- update configuration -->
 		<update log="${core.log}" timeout="200">
 			<local>${core.local}</local>
 			<remote>${core.remote}</remote>
-			<filter>core.war</filter>
 			<!-- optional monitoring deploy -->
-			<watch>icmp_seq</watch>
-			<rollback>Exception</rollback>
+			<watch>statisticsa</watch>
+			<rollback>statistics</rollback>
 		</update>
 		<!-- shell commands to execute after update -->
 		<post>
-			<cmd>service core start</cmd>
+			<cmd>pwd</cmd>
 		</post>
 	</deploy>
 </deployments>

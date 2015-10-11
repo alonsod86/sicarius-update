@@ -107,8 +107,7 @@ public class Deployments {
 				
 				String local = resolveVariables(nNode.getElementsByTagName("local").item(0).getTextContent());
 				String remote = resolveVariables(nNode.getElementsByTagName("remote").item(0).getTextContent());
-				String file = resolveVariables(nNode.getElementsByTagName("filter").item(0).getTextContent());
-				deployments.put(id, new Deploy(envs, logfile, timeout, watchText, rollbackText, local, remote, file, pre, post));
+				deployments.put(id, new Deploy(id, envs, logfile, timeout, watchText, rollbackText, local, remote, pre, post));
 			}
 		}
 	}

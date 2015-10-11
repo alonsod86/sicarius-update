@@ -11,29 +11,50 @@ import org.springframework.stereotype.Service;
 @DependsOn("Deployments")
 public class Deliverer {
 
+	/**
+	 * Deploys an artifact to the required environments
+	 * @param deploy
+	 */
 	public void deploy(Deploy deploy) {
 		List<Env> envs = deploy.getEnvironments();
 		envs.forEach(env -> {
 			boolean execution = true;
-			System.out.println("\nDeploying on [" + env.getAddress() + "] artifact " + deploy.getFile());
+			System.out.println("\n--- Deploying on [" + env.getAddress() + "] artifact " + deploy.getArtifact() + " ---");
 			SFTP sftp = new SFTP().connect(env);
 			// execute previous operations
 			List<String> pre = deploy.getPre();
 			for (String cmd : pre) {
-				execution &= executeCommand(cmd, null, deploy.getTimeout());
+				System.out.println("$ " + cmd);
+				execution &= executeCommand(cmd, null, null, deploy.getTimeout());
 			}
 			// deploy if previous ops executed ok
 			if (execution) {
+				System.out.println("$ Uploading file");
 				execution &= sftp.upload(deploy.getRemote(), deploy.getLocal());
 			}
 			// execute post operations
 			if (execution) {
 				List<String> post = deploy.getPost();
 				for (String cmd : post) {
-					execution &= executeCommand(cmd, null, deploy.getTimeout());
+					System.out.println("$ " + cmd);
+					execution &= executeCommand(cmd, null, null, deploy.getTimeout());
 				}
 			}
+			// execute watch and rollback monitors
+			if (deploy.getWatchText()!=null) {
+				execution &= executeCommand(deploy.getLogfile(), deploy.getWatchText(), deploy.getRollbackText(), deploy.getTimeout());
+			}
+			// print status and wait for confirmation
+			if (execution) {
+				System.out.println("Artifact deployed successfuly");
+			} else {
+				System.err.println("Error delpoying artifact "+deploy.getArtifact());
+			}
 			sftp.disconnect();
+			System.out.println("\n--- Press ENTER to continue ---");
+			try {
+	            System.in.read();
+	        } catch(Exception e) {}  
 		});
 	}
 
@@ -44,7 +65,7 @@ public class Deliverer {
 	 * @param timeout
 	 * @return
 	 */
-	private boolean executeCommand(String cmd, String watchText, Integer timeout) {
+	private boolean executeCommand(String cmd, String watchText, String rollbackText, Integer timeout) {
 		boolean executed = false;
 		Process p;
 
@@ -64,6 +85,9 @@ public class Deliverer {
 				// watch string found
 				if (watchText!=null && line.contains(watchText)) {
 					executed = true;
+					break;
+				} else if (rollbackText!=null && line.contains(rollbackText)) {
+					executed = false;
 					break;
 				}
 				// timeout control

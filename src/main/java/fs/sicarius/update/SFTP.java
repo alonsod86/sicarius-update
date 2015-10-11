@@ -11,21 +11,17 @@ import com.jcraft.jsch.Session;
 public class SFTP {
 	private JSch jsch;
 	private ChannelSftp sftp;
+	private Session session;
 
 	public SFTP connect(Env env) {
 		try {
 			jsch = new JSch();
-			// Connect to an SFTP server on port 22
-			Session session = jsch.getSession(env.getUser(), env.getAddress(), env.getPort());
+			session = jsch.getSession(env.getUser(), env.getAddress(), env.getPort());
 			session.setPassword(env.getPass());
-			// El protocolo SFTP requiere un intercambio de claves
-			// al asignarle esta propiedad le decimos que acepte la clave
-			// sin pedir confirmación
 			Properties prop = new Properties();
 			prop.put("StrictHostKeyChecking", "no");
 			session.setConfig(prop);
 			session.connect();
-			// Abrimos el canal de sftp y conectamos
 			sftp = (ChannelSftp) session.openChannel("sftp");
 			sftp.connect();
 
@@ -34,9 +30,12 @@ public class SFTP {
 	}
 
 	public SFTP disconnect() {
-		if (sftp!=null)
-			this.sftp.disconnect();
-		this.jsch = null;
+		try {
+			if (sftp!=null)
+				this.sftp.disconnect();
+			this.jsch = null;
+			this.session.disconnect();
+		} catch (Exception e) {}
 		return this;
 	}
 
@@ -48,19 +47,19 @@ public class SFTP {
 			return false;
 		}
 	}
-	
+
 	/**
-     * Método que crea un fichero en el sftp
-     * @return boolean
-     * @exception IOException
-     */
-    public boolean upload(String remoteFile, String localFile){
-        try {
-            this.sftp.put(localFile, remoteFile);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Error uploading file to server");
-        }
-        return false;
-    }
+	 * Método que crea un fichero en el sftp
+	 * @return boolean
+	 * @exception IOException
+	 */
+	public boolean upload(String remoteFile, String localFile){
+		try {
+			this.sftp.put(localFile, remoteFile);
+			return true;
+		} catch (Exception e) {
+			System.err.println("Error uploading file to server");
+		}
+		return false;
+	}
 }

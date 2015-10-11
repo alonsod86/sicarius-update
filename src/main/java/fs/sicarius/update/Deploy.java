@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.gson.Gson;
 
 public class Deploy {
-	
+	private String artifact;
 	private List<Env> environments;
 	private String logfile;
 	private Integer timeout;
@@ -13,13 +13,13 @@ public class Deploy {
 	private String rollbackText;
 	private String local;
 	private String remote;
-	private String file;
 	private List<String> pre;
 	private List<String> post;
 	
-	public Deploy(List<Env> environments, String logfile, Integer timeout, String watchText, String rollbackText,
-			String local, String remote, String file, List<String> pre, List<String> post) {
+	public Deploy(String artifact, List<Env> environments, String logfile, Integer timeout, String watchText, String rollbackText,
+			String local, String remote, List<String> pre, List<String> post) {
 		super();
+		this.artifact = artifact;
 		this.environments = environments;
 		this.logfile = logfile;
 		this.timeout = timeout;
@@ -27,9 +27,16 @@ public class Deploy {
 		this.rollbackText = rollbackText;
 		this.local = local;
 		this.remote = remote;
-		this.file = file;
 		this.pre = pre;
 		this.post = post;
+	}
+
+	public String getArtifact() {
+		return artifact;
+	}
+
+	public void setArtifact(String artifact) {
+		this.artifact = artifact;
 	}
 
 	public List<Env> getEnvironments() {
@@ -72,14 +79,6 @@ public class Deploy {
 		this.remote = remote;
 	}
 
-	public String getFile() {
-		return file;
-	}
-
-	public void setFile(String file) {
-		this.file = file;
-	}
-	
 	public List<String> getPre() {
 		return pre;
 	}
