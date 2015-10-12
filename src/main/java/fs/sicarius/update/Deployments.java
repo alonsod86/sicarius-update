@@ -61,10 +61,22 @@ public class Deployments {
 				Element eElement = (Element) nNode;
 				String id = eElement.getAttribute("id");
 				
+				// fetch build artifacts
+				Element pParam = (Element) eElement.getElementsByTagName("build").item(0);
+				List<Artifact> artifacts = new ArrayList<>();
+				NodeList lstParams = pParam.getElementsByTagName("artifact");
+				for (int index=0; index<lstParams.getLength(); index++) {
+					Element buildArtifact = (Element) eElement.getElementsByTagName("artifact").item(0);
+					String command = resolveVariables(lstParams.item(index).getTextContent());
+					String artifactId = buildArtifact.getAttribute("id");
+					String artifactPath = resolveVariables(buildArtifact.getAttribute("path"));
+					artifacts.add(new Artifact(artifactId, artifactPath, command));
+				}
+				
 				// fetch environments
-				Element pParam = (Element) eElement.getElementsByTagName("environments").item(0);
+				pParam = (Element) eElement.getElementsByTagName("environments").item(0);
 				List<Env> envs = new ArrayList<>();
-				NodeList lstParams = pParam.getElementsByTagName("env");
+				lstParams = pParam.getElementsByTagName("env");
 				for (int index=0; index<lstParams.getLength(); index++) {
 					String envId = lstParams.item(index).getTextContent();
 					envs.add(environments.getEnvironment(envId));
@@ -74,15 +86,11 @@ public class Deployments {
 				String watchText = null;
 				String rollbackText = null;
 				String logfile = null;
-				Integer timeout = null;
 				if (nNode.getElementsByTagName("watch").getLength()>0) {
 					Element update = (Element) eElement.getElementsByTagName("update").item(0);
 					Element watch = (Element) eElement.getElementsByTagName("watch").item(0);
 					Element rollback = (Element) eElement.getElementsByTagName("rollback").item(0);
 					logfile = resolveVariables(update.getAttribute("log"));
-					if (update.hasAttribute("timeout")) {
-						timeout = new Integer(resolveVariables(update.getAttribute("timeout")));
-					}
 					watchText = resolveVariables(watch.getTextContent());
 					rollbackText = resolveVariables(rollback.getTextContent());
 				}
@@ -107,7 +115,7 @@ public class Deployments {
 				
 				String local = resolveVariables(nNode.getElementsByTagName("local").item(0).getTextContent());
 				String remote = resolveVariables(nNode.getElementsByTagName("remote").item(0).getTextContent());
-				deployments.put(id, new Deploy(id, envs, logfile, timeout, watchText, rollbackText, local, remote, pre, post));
+				deployments.put(id, new Deploy(id, envs, logfile, watchText, rollbackText, local, remote, pre, post, artifacts));
 			}
 		}
 	}

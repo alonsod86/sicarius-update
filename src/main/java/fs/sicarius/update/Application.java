@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import fs.sicarius.update.commands.SFTP;
+
 @SpringBootApplication
 public class Application {
 
@@ -19,10 +21,11 @@ public class Application {
 		ConfigurableApplicationContext ctx = app.run(args);
 		
 		// show commands help
-		displayHelp();
-
+		//displayHelp();
+		updateDeploys(ctx);
+		
 		// main loop
-		boolean exit = false;
+		boolean exit = true;
 		while (!exit) {
 			System.out.print("> ");
 			String command = scanner.next();
@@ -40,7 +43,7 @@ public class Application {
     }
     
     /**
-     * 
+     * Update every deploy
      * @param ctx
      */
     private static void updateDeploys(ConfigurableApplicationContext ctx) {
@@ -86,7 +89,6 @@ public class Application {
     private static void displayHelp() {
     	System.out.println("");
 		System.out.println("/!\\ Sicarius cluster update /!\\");
-		System.out.println("");
 		System.out.println("Available options:");
 		System.out.println(" help: display this help");
 		System.out.println(" envs: displays a list of available environments");

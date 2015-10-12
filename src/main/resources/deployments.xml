@@ -5,19 +5,25 @@
 			<env>siccore1</env>
 			<env>siccore2</env>
 		</environments>
-		<!-- shell commands to execute before update -->
+		<!-- build commands to execute on the installer machine -->
+		<build>
+			<artifact id="core" path="${build.core.path}">mvn package -DskipTests</artifact>
+<!-- 			<artifact id="printer" path="${build.printer.path}">mvn package -DskipTests</artifact> -->
+<!-- 			<artifact id="front" path="${build.front.path}">mvn package -P ${build.front.profile} -DskipTests</artifact> -->
+		</build>
+		<!-- shell commands to execute before update in remote environment -->
 		<pre>
 			<cmd>pwd</cmd>
 		</pre>
 		<!-- update configuration -->
-		<update log="${core.log}" timeout="200">
+		<update log="${core.log}">
 			<local>${core.local}</local>
 			<remote>${core.remote}</remote>
 			<!-- optional monitoring deploy -->
-			<watch>statisticsa</watch>
-			<rollback>statistics</rollback>
+			<watch>statistics</watch>
+			<rollback>Exception</rollback>
 		</update>
-		<!-- shell commands to execute after update -->
+		<!-- shell commands to execute after update in remote environment -->
 		<post>
 			<cmd>pwd</cmd>
 		</post>

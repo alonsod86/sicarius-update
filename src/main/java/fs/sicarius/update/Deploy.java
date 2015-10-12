@@ -8,27 +8,27 @@ public class Deploy {
 	private String artifact;
 	private List<Env> environments;
 	private String logfile;
-	private Integer timeout;
 	private String watchText;
 	private String rollbackText;
 	private String local;
 	private String remote;
 	private List<String> pre;
 	private List<String> post;
+	private List<Artifact> build;
 	
-	public Deploy(String artifact, List<Env> environments, String logfile, Integer timeout, String watchText, String rollbackText,
-			String local, String remote, List<String> pre, List<String> post) {
+	public Deploy(String artifact, List<Env> environments, String logfile, String watchText, String rollbackText,
+			String local, String remote, List<String> pre, List<String> post, List<Artifact> build) {
 		super();
 		this.artifact = artifact;
 		this.environments = environments;
 		this.logfile = logfile;
-		this.timeout = timeout;
 		this.watchText = watchText;
 		this.rollbackText = rollbackText;
 		this.local = local;
 		this.remote = remote;
 		this.pre = pre;
 		this.post = post;
+		this.build = build;
 	}
 
 	public String getArtifact() {
@@ -53,14 +53,6 @@ public class Deploy {
 
 	public void setLogfile(String logfile) {
 		this.logfile = logfile;
-	}
-
-	public Integer getTimeout() {
-		return timeout;
-	}
-
-	public void setTimeout(Integer timeout) {
-		this.timeout = timeout;
 	}
 
 	public String getLocal() {
@@ -109,6 +101,14 @@ public class Deploy {
 
 	public void setRollbackText(String rollbackText) {
 		this.rollbackText = rollbackText;
+	}
+
+	public List<Artifact> getBuild() {
+		return build;
+	}
+
+	public void setBuild(List<Artifact> build) {
+		this.build = build;
 	}
 
 	@Override

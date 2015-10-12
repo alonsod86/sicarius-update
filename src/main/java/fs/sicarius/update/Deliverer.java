@@ -7,6 +7,9 @@ import java.util.List;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
+import fs.sicarius.update.commands.SFTP;
+import fs.sicarius.update.commands.Shell;
+
 @Service
 @DependsOn("Deployments")
 public class Deliverer {
@@ -18,14 +21,26 @@ public class Deliverer {
 	public void deploy(Deploy deploy) {
 		List<Env> envs = deploy.getEnvironments();
 		envs.forEach(env -> {
+			Shell sh = new Shell().connect(env);
 			boolean execution = true;
 			System.out.println("\n--- Deploying on [" + env.getAddress() + "] artifact " + deploy.getArtifact() + " ---");
 			SFTP sftp = new SFTP().connect(env);
+			// execute build operations if any
+			List<Artifact> build = deploy.getBuild();
+			if (build!=null) {
+				build.forEach(b->{
+					executeCommand("cd /Users/alonso/tmp/");
+					executeCommand("ls");
+					executeCommand(b.getCommand());
+				});
+			}
 			// execute previous operations
 			List<String> pre = deploy.getPre();
-			for (String cmd : pre) {
-				System.out.println("$ " + cmd);
-				execution &= executeCommand(cmd, null, null, deploy.getTimeout());
+			if (pre!=null) {
+				pre.forEach(cmd->{
+					System.out.println("$ " + cmd);
+					sh.execute(cmd);
+				});
 			}
 			// deploy if previous ops executed ok
 			if (execution) {
@@ -35,14 +50,16 @@ public class Deliverer {
 			// execute post operations
 			if (execution) {
 				List<String> post = deploy.getPost();
-				for (String cmd : post) {
-					System.out.println("$ " + cmd);
-					execution &= executeCommand(cmd, null, null, deploy.getTimeout());
+				if (post!=null) {
+					post.forEach(cmd->{
+						System.out.println("$ " + cmd);
+						sh.execute(cmd);
+					});
 				}
 			}
 			// execute watch and rollback monitors
 			if (deploy.getWatchText()!=null) {
-				execution &= executeCommand(deploy.getLogfile(), deploy.getWatchText(), deploy.getRollbackText(), deploy.getTimeout());
+				execution &= executeCommand(deploy.getLogfile(), deploy.getWatchText(), deploy.getRollbackText(), null);
 			}
 			// print status and wait for confirmation
 			if (execution) {
@@ -51,6 +68,7 @@ public class Deliverer {
 				System.err.println("Error delpoying artifact "+deploy.getArtifact());
 			}
 			sftp.disconnect();
+			sh.disconnect();
 			System.out.println("\n--- Press ENTER to continue ---");
 			try {
 	            System.in.read();
@@ -60,6 +78,17 @@ public class Deliverer {
 
 	/**
 	 * Executes a shell command
+	 * @param cmd
+	 * @param watchText
+	 * @param timeout
+	 * @return
+	 */
+	private boolean executeCommand(String cmd) {
+		return executeCommand(cmd, null, null, null);
+	}
+	
+	/**
+	 * Executes a shell command, returning true if watchText is found, and false if rollbackText is found or timeout
 	 * @param cmd
 	 * @param watchText
 	 * @param timeout
